@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using Log_Handler;
 
 namespace DropboxDataCleanup
 {
@@ -33,7 +34,7 @@ namespace DropboxDataCleanup
         {
             foreach (Metadata item in await DropboxTasks.GetOutOfDateItemsAsync("/ExternalUpload/Cloud Data/", new TimeSpan(31,0,0)))
             {
-                MessageBox.Show(item.IsFile + " " + item.PathDisplay);
+                LogHandler.CreateEntry(SeverityLevel.Trace, item.PathDisplay);
             }
 
             Application.Current.Shutdown();
@@ -48,7 +49,7 @@ namespace DropboxDataCleanup
 
             try
             {
-                Loggy.Log("Reading content of " + path);
+                LogHandler.CreateEntry(SeverityLevel.Trace, "Getting contents of " + path + " with recursive flag set to " + recursive);
                 return await client.Files.ListFolderAsync(path, recursive: recursive);
             }
             catch
@@ -63,7 +64,7 @@ namespace DropboxDataCleanup
             DropboxClient client = ApplicationVariables.dropboxClient;
             List<Metadata> returnList = new List<Metadata>();
 
-            ListFolderResult content = await getFolderContent(path);
+            ListFolderResult content = await getFolderContent(path, recursive: true);
             if (content == null)
                 return null;
 
@@ -75,7 +76,7 @@ namespace DropboxDataCleanup
                     returnList.Add(item);
                 }
                 else if (item.IsFolder
-                    && !await CheckForInDateContent(item.AsFolder, maxAge))
+                    && !new DropboxFolder(item.AsFolder).CheckForInDateContent(maxAge, content.Entries))
                 {
                     returnList.Add(item);
                 }
@@ -83,19 +84,50 @@ namespace DropboxDataCleanup
 
             return returnList;
         }
+    }
 
-        private static async Task<bool> CheckForInDateContent(FolderMetadata folder, TimeSpan maxAge)
+    public class DropboxFolder
+    {
+        public FolderMetadata metadata { get; private set; }
+
+        public DropboxFolder(FolderMetadata metadata)
         {
-            Loggy.Log("Checking for content in " + folder.PathDisplay);
+            this.metadata = metadata;
+        }
 
-            ListFolderResult content = await getFolderContent(folder.PathLower, recursive: true);
+        private List<Metadata> GetChildren(IList<Metadata> content)
+        {
+            LogHandler.CreateEntry(SeverityLevel.Trace, "Fetching children of " + metadata.PathDisplay);
 
-            foreach (Metadata item in content.Entries)
+            List<Metadata> returnList = new List<Metadata>();
+
+            foreach (Metadata item in content)
+            {
+                if (item.PathLower.StartsWith(metadata.PathLower))
+                {
+                    returnList.Add(item);
+                }
+            }
+
+            LogHandler.CreateEntry(SeverityLevel.Trace, "Found " + returnList.Count.ToString() + " children of " + metadata.PathDisplay);
+
+            return returnList;
+        }
+
+        public bool CheckForInDateContent(TimeSpan maxAge, IList<Metadata> content)
+        {
+            LogHandler.CreateEntry(SeverityLevel.Trace, "Checking for in-date content in " + metadata.PathDisplay);
+
+            foreach (Metadata item in GetChildren(content))
             {
                 if (item.IsFile
                     && item.AsFile.ServerModified >= DateTime.Now - maxAge)
+                {
+                    LogHandler.CreateEntry(SeverityLevel.Trace, "Found in-date content in " + metadata.PathDisplay);
                     return true;
+                }
             }
+            LogHandler.CreateEntry(SeverityLevel.Trace, "Did not find in-date content in " + metadata.PathDisplay);
             return false;
         }
     }
@@ -112,19 +144,6 @@ namespace DropboxDataCleanup
                     _dropboxClient = DropboxAuth.SetupClient();
                 }
                 return _dropboxClient;
-            }
-        }
-    }
-
-    public static class Loggy
-    {
-        static string logFilePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "loggy.txt";
-
-        public static void Log(string message)
-        {
-            using (StreamWriter writer = new StreamWriter(logFilePath))
-            {
-                writer.WriteLine(message);
             }
         }
     }
