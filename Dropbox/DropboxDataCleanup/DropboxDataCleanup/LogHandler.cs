@@ -53,7 +53,7 @@ namespace Log_Handler
         private static void Initialise()
         {
             string applicationFolder = AppDomain.CurrentDomain.BaseDirectory;
-            filePath = applicationFolder + @"UpdateLog.xml";
+            filePath = applicationFolder + @"Log.xml";
         }
 
         private static void CreateLogFile()
@@ -63,7 +63,7 @@ namespace Log_Handler
             XmlElement root = defaultLogFile.DocumentElement;
             defaultLogFile.InsertBefore(xmlDeclaration, root);
 
-            XmlElement rootNode = defaultLogFile.CreateElement("UpdateLog");
+            XmlElement rootNode = defaultLogFile.CreateElement("Log");
             defaultLogFile.AppendChild(rootNode);
 
             try
@@ -88,7 +88,7 @@ namespace Log_Handler
 
             }
 
-            logFile.SelectSingleNode("UpdateLog").AppendChild(currentSession.CreateXmlElement(logFile));
+            logFile.SelectSingleNode("Log").AppendChild(currentSession.CreateXmlElement(logFile));
 
             try
             {
@@ -124,7 +124,7 @@ namespace Log_Handler
 
                 }
 
-                if (logFile.SelectSingleNode("UpdateLog") == null)
+                if (logFile.SelectSingleNode("Log") == null)
                 {
                     CreateLogFile();
                 }
@@ -145,7 +145,7 @@ namespace Log_Handler
 
             }
 
-            XmlNode sessionNode = logFile.SelectSingleNode("UpdateLog/LogSession[@StartTime='" + currentSession.startTime.ToString("o") + "']");
+            XmlNode sessionNode = logFile.SelectSingleNode("Log/LogSession[@StartTime='" + currentSession.startTime.ToString("o") + "']");
 
             sessionNode.AppendChild(logEntry.CreateXmlElement(logFile));
 
@@ -220,7 +220,6 @@ namespace Log_Handler
             userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
             startTime = DateTime.Now;
             currentApplicationVersion = Assembly.GetEntryAssembly().GetName().Version;
-            currentAutoUpdateDllVersion = Assembly.LoadFrom("AutoUpdate.dll").GetName().Version;
         }
 
         public XmlElement CreateXmlElement(XmlDocument xmlDoc)
@@ -234,10 +233,6 @@ namespace Log_Handler
             XmlAttribute currentApplicationVersionAttribute = xmlDoc.CreateAttribute("CurrentApplicationVersion");
             currentApplicationVersionAttribute.InnerText = currentApplicationVersion.ToString();
             element.Attributes.Append(currentApplicationVersionAttribute);
-            
-            XmlAttribute currentAutoUpdateDllVersionAttribute = xmlDoc.CreateAttribute("CurrentAutoUpdateDllVersion");
-            currentAutoUpdateDllVersionAttribute.InnerText = currentAutoUpdateDllVersion.ToString();
-            element.Attributes.Append(currentAutoUpdateDllVersionAttribute);
             
             XmlAttribute machineNameAttribute = xmlDoc.CreateAttribute("MachineName");
             machineNameAttribute.InnerText = machineName;
