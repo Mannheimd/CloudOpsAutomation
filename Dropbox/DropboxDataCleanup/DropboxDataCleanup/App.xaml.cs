@@ -59,21 +59,25 @@ namespace DropboxDataCleanup
             }
         }
 
-        public static async Task<List<Metadata>> GetOutOfDateItemsAsync(string path, TimeSpan maxAge)
+        public static async Task<List<Metadata>> GetOutOfDateItemsAsync(string folderPathWithSlash, TimeSpan maxAge)
         {
             DropboxClient client = ApplicationVariables.dropboxClient;
             List<Metadata> returnList = new List<Metadata>();
 
-            ListFolderResult content = await getFolderContent(path, recursive: true);
+            ListFolderResult content = await getFolderContent(folderPathWithSlash, recursive: true);
             if (content == null)
                 return null;
 
             foreach (Metadata item in content.Entries)
             {
-                if (item.IsFile
-                    && item.AsFile.ServerModified < DateTime.Now - maxAge)
+                if (item.IsFile)
                 {
-                    returnList.Add(item);
+                    DropboxFile file = new DropboxFile(item.AsFile);
+                    if (!file.IsDirectDescendant(folderPathWithSlash)
+                        || file.IsInDate(maxAge))
+                        continue;
+                    else
+                        returnList.Add(item);
                 }
                 else if (item.IsFolder
                     && !new DropboxFolder(item.AsFolder).CheckForInDateContent(maxAge, content.Entries))
@@ -83,6 +87,32 @@ namespace DropboxDataCleanup
             }
 
             return returnList;
+        }
+    }
+
+    public class DropboxFile
+    {
+        public FileMetadata metadata { get; private set; }
+
+        public DropboxFile(FileMetadata metadata)
+        {
+            this.metadata = metadata;
+        }
+
+        public bool IsDirectDescendant(string folderPathWithSlash)
+        {
+            if (folderPathWithSlash + metadata.Name == metadata.PathLower)
+                return true;
+            else
+                return false;
+        }
+
+        public bool IsInDate(TimeSpan maxAge)
+        {
+            if (metadata.ServerModified < DateTime.Now - maxAge)
+                return false;
+            else
+                return true;
         }
     }
 
