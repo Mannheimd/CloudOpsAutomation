@@ -32,9 +32,9 @@ namespace DropboxDataCleanup
     {
         public static async void Run()
         {
-            foreach (Metadata item in await DropboxTasks.GetOutOfDateItemsAsync("/ExternalUpload/Cloud Data/", new TimeSpan(31,0,0)))
+            foreach (Metadata item in await DropboxTasks.GetOutOfDateItemsAsync("/ExternalUpload/Cloud Data/", new TimeSpan(31,0,0,0)))
             {
-                LogHandler.CreateEntry(SeverityLevel.Trace, item.PathDisplay);
+                LogHandler.CreateEntry(SeverityLevel.Debug, item.PathDisplay);
             }
 
             Application.Current.Shutdown();
@@ -49,7 +49,7 @@ namespace DropboxDataCleanup
 
             try
             {
-                LogHandler.CreateEntry(SeverityLevel.Trace, "Getting contents of " + path + " with recursive flag set to " + recursive);
+                LogHandler.CreateEntry(SeverityLevel.Debug, "Getting contents of " + path + " with recursive flag set to " + recursive);
                 return await client.Files.ListFolderAsync(path, recursive: recursive);
             }
             catch
@@ -73,16 +73,22 @@ namespace DropboxDataCleanup
                 if (item.IsFile)
                 {
                     DropboxFile file = new DropboxFile(item.AsFile);
-                    if (!file.IsDirectDescendant(folderPathWithSlash)
-                        || file.IsInDate(maxAge))
-                        continue;
-                    else
+                    if (file.IsDirectDescendant(folderPathWithSlash)
+                        && !file.IsInDate(maxAge))
+                    {
                         returnList.Add(item);
+                    }
                 }
-                else if (item.IsFolder
-                    && !new DropboxFolder(item.AsFolder).CheckForInDateContent(maxAge, content.Entries))
+                else if (item.IsFolder)
                 {
-                    returnList.Add(item);
+                    DropboxFolder folder = new DropboxFolder(item.AsFolder);
+                    if (folder.metadata.PathLower + "/" == folderPathWithSlash)
+                        continue;
+
+                    if (folder.HasNoInDateContent(maxAge, content.Entries))
+                    {
+                        returnList.Add(item);
+                    }
                 }
             }
 
@@ -127,38 +133,48 @@ namespace DropboxDataCleanup
 
         private List<Metadata> GetChildren(IList<Metadata> content)
         {
-            LogHandler.CreateEntry(SeverityLevel.Trace, "Fetching children of " + metadata.PathDisplay);
+            LogHandler.CreateEntry(SeverityLevel.Debug, "Fetching children of " + metadata.PathLower);
 
             List<Metadata> returnList = new List<Metadata>();
 
             foreach (Metadata item in content)
             {
-                if (item.PathLower.StartsWith(metadata.PathLower))
+                if (item.PathLower.StartsWith(metadata.PathLower)
+                    && item.PathLower != metadata.PathLower)
                 {
+                    LogHandler.CreateEntry(SeverityLevel.Trace, "Found child " + item.PathLower);
                     returnList.Add(item);
                 }
             }
 
-            LogHandler.CreateEntry(SeverityLevel.Trace, "Found " + returnList.Count.ToString() + " children of " + metadata.PathDisplay);
+            LogHandler.CreateEntry(SeverityLevel.Debug, "Found " + returnList.Count.ToString() + " children of " + metadata.PathLower);
 
             return returnList;
         }
 
-        public bool CheckForInDateContent(TimeSpan maxAge, IList<Metadata> content)
+        public bool HasNoInDateContent(TimeSpan maxAge, IList<Metadata> content)
         {
-            LogHandler.CreateEntry(SeverityLevel.Trace, "Checking for in-date content in " + metadata.PathDisplay);
+            LogHandler.CreateEntry(SeverityLevel.Debug, "Checking for content in " + metadata.PathLower + " modified after " + (DateTime.Now - maxAge));
 
             foreach (Metadata item in GetChildren(content))
             {
-                if (item.IsFile
-                    && item.AsFile.ServerModified >= DateTime.Now - maxAge)
+                if (item.IsFile)
                 {
-                    LogHandler.CreateEntry(SeverityLevel.Trace, "Found in-date content in " + metadata.PathDisplay);
-                    return true;
+                    DropboxFile file = new DropboxFile(item.AsFile);
+                    if (file.IsInDate(maxAge))
+                    {
+                        LogHandler.CreateEntry(SeverityLevel.Trace, "Found in-date item: " + file.metadata.PathLower);
+                        LogHandler.CreateEntry(SeverityLevel.Debug, "Found in-date content in " + metadata.PathLower);
+                        return false;
+                    }
+                    else
+                    {
+                        LogHandler.CreateEntry(SeverityLevel.Trace, "Found out-of-date item: " + file.metadata.PathLower + " modified " + file.metadata.ServerModified);
+                    }
                 }
             }
-            LogHandler.CreateEntry(SeverityLevel.Trace, "Did not find in-date content in " + metadata.PathDisplay);
-            return false;
+            LogHandler.CreateEntry(SeverityLevel.Debug, "Did not find in-date content in " + metadata.PathLower);
+            return true;
         }
     }
 
