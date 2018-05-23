@@ -116,7 +116,7 @@ namespace DropboxDataCleanup
             }
             catch (Exception e)
             {
-                LogHandler.CreateEntry(SeverityLevel.Error, "Failed to send delete batch: " + e.Message);
+                LogHandler.CreateEntry(e, SeverityLevel.Error, "Failed to send delete batch");
                 return null;
             }
 
@@ -132,7 +132,7 @@ namespace DropboxDataCleanup
                 }
                 catch (Exception e)
                 {
-                    LogHandler.CreateEntry(SeverityLevel.Error, "Checking on batch status failed: " + e.Message);
+                    LogHandler.CreateEntry(e, SeverityLevel.Error, "Checking on batch status failed");
                 }
 
                 if (batchStatus.IsInProgress)
