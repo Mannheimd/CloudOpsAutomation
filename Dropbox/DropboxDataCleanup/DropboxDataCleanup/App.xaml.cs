@@ -34,7 +34,7 @@ namespace DropboxDataCleanup
     {
         public static async void Run()
         {
-            await DropboxTasks.DeleteOutOfDateContentAsync("/ExternalUpload/Cloud Data", new TimeSpan(0, 0, 0, 0));
+            await DropboxTasks.DeleteOutOfDateContentAsync("/ExternalUpload/Cloud Data", new TimeSpan(31, 0, 0, 0));
 
             Application.Current.Shutdown();
         }
