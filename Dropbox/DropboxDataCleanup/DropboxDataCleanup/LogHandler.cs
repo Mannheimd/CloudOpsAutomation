@@ -7,6 +7,8 @@ namespace Log_Handler
 {
     class LogHandler
     {
+        static SeverityLevel loggingLevel = SeverityLevel.Info;
+
         /// <summary>
         /// Creates a new log entry using the specified severity level and a system exception
         /// </summary>
@@ -15,6 +17,9 @@ namespace Log_Handler
         /// <param name="subject">A brief description of the event</param>
         public static void CreateEntry(Exception e, SeverityLevel severity, string subject)
         {
+            if (severity < loggingLevel)
+                return;
+
             LogEntry logEntry = new LogEntry()
             {
                 time = DateTime.Now,
@@ -33,6 +38,9 @@ namespace Log_Handler
         /// <param name="subject">A brief description of the event</param>
         public static void CreateEntry(SeverityLevel severity, string subject)
         {
+            if (severity < loggingLevel)
+                return;
+
             LogEntry logEntry = new LogEntry()
             {
                 time = DateTime.Now,
@@ -248,11 +256,11 @@ namespace Log_Handler
     
     public enum SeverityLevel
     {
-        Fatal,  // Data loss is likely to have occurred, or is likely to occur, as a result of this event
-        Error,  // Application cannot function correctly following this event, and will likely terminate
-        Warn,   // Application was stopped from doing something but can keep running, maybe switched to a backup or wasn't able to load a page
-        Info,   // Useful information about what just happened, maybe a service started or a connection was established
+        Trace,  // Application has an itch on its nose that the developer might want to know about
         Debug,  // Information useful for technicians or sysadmins to troubleshoot an issue
-        Trace   // Application has an itch on its nose that the developer might want to know about
+        Info,   // Useful information about what just happened, maybe a service started or a connection was established
+        Warn,   // Application was stopped from doing something but can keep running, maybe switched to a backup or wasn't able to load a page
+        Error,  // Application cannot function correctly following this event, and will likely terminate
+        Fatal   // Data loss is likely to have occurred, or is likely to occur, as a result of this event
     }
 }
