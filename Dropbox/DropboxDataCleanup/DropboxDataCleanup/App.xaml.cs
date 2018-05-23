@@ -34,7 +34,7 @@ namespace DropboxDataCleanup
     {
         public static async void Run()
         {
-            foreach (Metadata item in await DropboxTasks.GetOutOfDateItemsAsync("/ExternalUpload/Cloud Data/", new TimeSpan(31,0,0,0)))
+            foreach (Metadata item in await DropboxTasks.GetOutOfDateItemsAsync("/ExternalUpload/Cloud Data", new TimeSpan(31,0,0,0)))
             {
                 LogHandler.CreateEntry(SeverityLevel.Debug, item.PathDisplay);
             }
@@ -61,12 +61,14 @@ namespace DropboxDataCleanup
             }
         }
 
-        public static async Task<List<Metadata>> GetOutOfDateItemsAsync(string folderPathWithSlash, TimeSpan maxAge)
+        public static async Task<List<Metadata>> GetOutOfDateItemsAsync(string folderPath, TimeSpan maxAge)
         {
+            LogHandler.CreateEntry(SeverityLevel.Info, "Looking for items in " + folderPath + " older than " + maxAge);
+
             DropboxClient client = ApplicationVariables.dropboxClient;
             List<Metadata> returnList = new List<Metadata>();
 
-            ListFolderResult content = await GetFolderContent(folderPathWithSlash, recursive: true);
+            ListFolderResult content = await GetFolderContent(folderPath, recursive: true);
             if (content == null)
                 return null;
 
@@ -75,7 +77,7 @@ namespace DropboxDataCleanup
                 if (item.IsFile)
                 {
                     DropboxFile file = new DropboxFile(item.AsFile);
-                    if (file.IsDirectDescendant(folderPathWithSlash)
+                    if (file.IsDirectDescendant(folderPath)
                         && !file.IsInDate(maxAge))
                     {
                         returnList.Add(item);
@@ -84,7 +86,7 @@ namespace DropboxDataCleanup
                 else if (item.IsFolder)
                 {
                     DropboxFolder folder = new DropboxFolder(item.AsFolder);
-                    if (folder.metadata.PathLower + "/" == folderPathWithSlash)
+                    if (folder.metadata.PathLower == folderPath)
                         continue;
 
                     if (await folder.CanBeDeletedAsync(maxAge, content.Entries))
@@ -177,9 +179,9 @@ namespace DropboxDataCleanup
             this.metadata = metadata;
         }
 
-        public bool IsDirectDescendant(string folderPathWithSlash)
+        public bool IsDirectDescendant(string folderPath)
         {
-            if (folderPathWithSlash + metadata.Name == metadata.PathLower)
+            if (folderPath + metadata.Name == metadata.PathLower)
                 return true;
             else
                 return false;

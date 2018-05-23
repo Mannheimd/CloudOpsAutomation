@@ -2468,4 +2468,50 @@
       <Subject>Folder is empty: /externalupload/cloud data/krauss computing - 8010770660</Subject>
     </LogEntry>
   </LogSession>
+  <LogSession StartTime="2018-05-23T20:12:16.3653312+01:00" CurrentApplicationVersion="1.0.0.0" MachineName="NCL-100000176" UserName="SWIFTPAGE\christopher.manders">
+    <LogEntry Time="2018-05-23T20:12:16.3623578+01:00">
+      <Severity>Info</Severity>
+      <Subject>Folder is empty: /externalupload/cloud data/datalogic/ripley entertainment, inc.</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-23T20:12:16.3914296+01:00">
+      <Severity>Info</Severity>
+      <Subject>Folder is empty: /externalupload/cloud data/nba uk ltd - 000</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-23T20:12:16.4074432+01:00">
+      <Severity>Info</Severity>
+      <Subject>Folder is empty: /externalupload/cloud data/krauss computing - 8010770660</Subject>
+    </LogEntry>
+  </LogSession>
+  <LogSession StartTime="2018-05-23T20:13:07.3458414+01:00" CurrentApplicationVersion="1.0.0.0" MachineName="NCL-100000176" UserName="SWIFTPAGE\christopher.manders">
+    <LogEntry Time="2018-05-23T20:13:07.3428334+01:00">
+      <Severity>Info</Severity>
+      <Subject>Folder is empty: /externalupload/cloud data/datalogic/ripley entertainment, inc.</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-23T20:13:07.3749190+01:00">
+      <Severity>Info</Severity>
+      <Subject>Folder is empty: /externalupload/cloud data/nba uk ltd - 000</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-23T20:13:07.3939698+01:00">
+      <Severity>Info</Severity>
+      <Subject>Folder is empty: /externalupload/cloud data/krauss computing - 8010770660</Subject>
+    </LogEntry>
+  </LogSession>
+  <LogSession StartTime="2018-05-23T20:14:32.5963726+01:00" CurrentApplicationVersion="1.0.0.0" MachineName="NCL-100000176" UserName="SWIFTPAGE\christopher.manders">
+    <LogEntry Time="2018-05-23T20:14:32.5913598+01:00">
+      <Severity>Info</Severity>
+      <Subject>Looking for items in /ExternalUpload/Cloud Data older than 31.00:00:00</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-23T20:14:34.9969689+01:00">
+      <Severity>Info</Severity>
+      <Subject>Folder is empty: /externalupload/cloud data/datalogic/ripley entertainment, inc.</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-23T20:14:35.0140044+01:00">
+      <Severity>Info</Severity>
+      <Subject>Folder is empty: /externalupload/cloud data/nba uk ltd - 000</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-23T20:14:35.0340399+01:00">
+      <Severity>Info</Severity>
+      <Subject>Folder is empty: /externalupload/cloud data/krauss computing - 8010770660</Subject>
+    </LogEntry>
+  </LogSession>
 </Log>
