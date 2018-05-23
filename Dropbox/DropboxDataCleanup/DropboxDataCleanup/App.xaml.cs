@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Log_Handler;
 using Dropbox.Api.FileRequests;
+using Dropbox.Api.Async;
 
 namespace DropboxDataCleanup
 {
@@ -44,7 +45,7 @@ namespace DropboxDataCleanup
 
     public static class DropboxTasks
     {
-        private static async Task<ListFolderResult> getFolderContent(string path, bool recursive = false)
+        private static async Task<ListFolderResult> GetFolderContent(string path, bool recursive = false)
         {
             DropboxClient client = ApplicationVariables.dropboxClient;
 
@@ -65,7 +66,7 @@ namespace DropboxDataCleanup
             DropboxClient client = ApplicationVariables.dropboxClient;
             List<Metadata> returnList = new List<Metadata>();
 
-            ListFolderResult content = await getFolderContent(folderPathWithSlash, recursive: true);
+            ListFolderResult content = await GetFolderContent(folderPathWithSlash, recursive: true);
             if (content == null)
                 return null;
 
@@ -94,6 +95,76 @@ namespace DropboxDataCleanup
             }
 
             return returnList;
+        }
+
+        public static async Task<DeleteBatchResult> DeleteItems(List<Metadata> items)
+        {
+            DropboxClient client = ApplicationVariables.dropboxClient;
+            DeleteBatchArg deleteBatchArg = new DeleteBatchArg();
+
+            foreach (Metadata item in items)
+            {
+                deleteBatchArg.Entries.Add(new DeleteArg(item.PathLower));
+            }
+
+            DeleteBatchLaunch batchLaunch = new DeleteBatchLaunch();
+            try
+            {
+                LogHandler.CreateEntry(SeverityLevel.Debug, "Sending delete batch");
+                batchLaunch = await client.Files.DeleteBatchAsync(deleteBatchArg);
+                LogHandler.CreateEntry(SeverityLevel.Trace, "Delete batch sent");
+            }
+            catch (Exception e)
+            {
+                LogHandler.CreateEntry(SeverityLevel.Error, "Failed to send delete batch: " + e.Message);
+                return null;
+            }
+
+            PollArg pollArg = new PollArg(batchLaunch.AsAsyncJobId.Value);
+            DeleteBatchJobStatus batchStatus = new DeleteBatchJobStatus();
+            do
+            {
+                LogHandler.CreateEntry(SeverityLevel.Trace, "Checking delete batch status");
+
+                try
+                {
+                    batchStatus = await client.Files.DeleteBatchCheckAsync(pollArg);
+                }
+                catch (Exception e)
+                {
+                    LogHandler.CreateEntry(SeverityLevel.Error, "Checking on batch status failed: " + e.Message);
+                }
+
+                if (batchStatus.IsInProgress)
+                {
+                    LogHandler.CreateEntry(SeverityLevel.Trace, "Delete batch is in progress");
+                    await Task.Delay(1000);
+                }
+            }
+            while (batchStatus.IsInProgress);
+
+            LogHandler.CreateEntry(SeverityLevel.Trace, "Exited batch check loop");
+
+            if (batchStatus.IsFailed)
+            {
+                LogHandler.CreateEntry(SeverityLevel.Error, "Delete batch failed: " + DeleteBatchErrorText(batchStatus.AsFailed.Value));
+                return null;
+            }
+            else if (!batchStatus.IsComplete)
+            {
+                LogHandler.CreateEntry(SeverityLevel.Error, "Delete batch did not complete; unknown failure");
+                return null;
+            }
+
+            return batchStatus.AsComplete.Value;
+        }
+
+        private static string DeleteBatchErrorText(DeleteBatchError error)
+        {
+            if (error.IsTooManyWriteOperations)
+                return "Too many write operations";
+            else
+                return "Unknown error";
         }
     }
 
