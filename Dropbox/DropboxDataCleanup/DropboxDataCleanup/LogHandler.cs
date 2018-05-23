@@ -7,7 +7,7 @@ namespace Log_Handler
 {
     class LogHandler
     {
-        static SeverityLevel loggingLevel = SeverityLevel.Info;
+        static SeverityLevel loggingLevel = SeverityLevel.Trace;
 
         /// <summary>
         /// Creates a new log entry using the specified severity level and a system exception

@@ -34,10 +34,7 @@ namespace DropboxDataCleanup
     {
         public static async void Run()
         {
-            foreach (Metadata item in await DropboxTasks.GetOutOfDateItemsAsync("/ExternalUpload/Cloud Data", new TimeSpan(31,0,0,0)))
-            {
-                LogHandler.CreateEntry(SeverityLevel.Debug, item.PathDisplay);
-            }
+            await DropboxTasks.DeleteOutOfDateContentAsync("/ExternalUpload/Cloud Data", new TimeSpan(0, 0, 0, 0));
 
             Application.Current.Shutdown();
         }
@@ -45,6 +42,23 @@ namespace DropboxDataCleanup
 
     public static class DropboxTasks
     {
+        public static async Task DeleteOutOfDateContentAsync(string path, TimeSpan maxAge)
+        {
+            List<Metadata> itemsToDelete = await GetOutOfDateItemsAsync(path, maxAge);
+
+            if (itemsToDelete != null
+                && itemsToDelete.Count > 0)
+            {
+                await DeleteItems(itemsToDelete);
+            }
+            else
+            {
+                LogHandler.CreateEntry(SeverityLevel.Info, "Nothing to delete");
+            }
+
+            LogHandler.CreateEntry(SeverityLevel.Info, "Finished deleting out of date content");
+        }
+
         private static async Task<ListFolderResult> GetFolderContent(string path, bool recursive = false)
         {
             DropboxClient client = ApplicationVariables.dropboxClient;
@@ -61,7 +75,7 @@ namespace DropboxDataCleanup
             }
         }
 
-        public static async Task<List<Metadata>> GetOutOfDateItemsAsync(string folderPath, TimeSpan maxAge)
+        private static async Task<List<Metadata>> GetOutOfDateItemsAsync(string folderPath, TimeSpan maxAge)
         {
             LogHandler.CreateEntry(SeverityLevel.Info, "Looking for items in " + folderPath + " older than " + maxAge);
 
@@ -86,7 +100,7 @@ namespace DropboxDataCleanup
                 else if (item.IsFolder)
                 {
                     DropboxFolder folder = new DropboxFolder(item.AsFolder);
-                    if (folder.metadata.PathLower == folderPath)
+                    if (folder.metadata.PathLower.ToLower() == folderPath.ToLower())
                         continue;
 
                     if (await folder.CanBeDeletedAsync(maxAge, content.Entries))
@@ -99,13 +113,16 @@ namespace DropboxDataCleanup
             return returnList;
         }
 
-        public static async Task<DeleteBatchResult> DeleteItems(List<Metadata> items)
+        private static async Task<DeleteBatchResult> DeleteItems(List<Metadata> items)
         {
+            LogHandler.CreateEntry(SeverityLevel.Info, "Starting delete of " + items.Count + " items");
+
             DropboxClient client = ApplicationVariables.dropboxClient;
-            DeleteBatchArg deleteBatchArg = new DeleteBatchArg();
+            DeleteBatchArg deleteBatchArg = new DeleteBatchArg(new List<DeleteArg>());
 
             foreach (Metadata item in items)
             {
+                LogHandler.CreateEntry(SeverityLevel.Trace, "Queueing item for deletion: " + item.PathLower);
                 deleteBatchArg.Entries.Add(new DeleteArg(item.PathLower));
             }
 
