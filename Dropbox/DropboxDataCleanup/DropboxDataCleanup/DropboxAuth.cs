@@ -61,7 +61,7 @@ namespace DropboxDataCleanup
 
         private static void StoreAccessToken()
         {
-            SecureCreds(accessToken, "APCDropbox");
+            SecureCreds(accessToken, "DataCleanupUtility");
         }
 
         private static void AcquireNewOAuthToken()
