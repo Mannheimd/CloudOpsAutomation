@@ -19,6 +19,7 @@ namespace DropboxDataCleanup
         private static string oAuth2State;
         private static string appKey = "5xpffww5qkvm3hu";
         private static Uri redirectUri = new Uri("https://localhost/authorise");
+        private static string appName = "DataCleanupUtility";
 
         public static DropboxClient SetupClient()
         {
@@ -48,9 +49,9 @@ namespace DropboxDataCleanup
 
         public static string GetAccessToken()
         {
-            if (UnsecureCreds("APCDropbox") != null)
+            if (UnsecureCreds(appName) != null)
             {
-                return Encoding.UTF8.GetString(UnsecureCreds("APCDropbox"));
+                return Encoding.UTF8.GetString(UnsecureCreds(appName));
             }
             else
             {
@@ -61,7 +62,7 @@ namespace DropboxDataCleanup
 
         private static void StoreAccessToken()
         {
-            SecureCreds(accessToken, "DataCleanupUtility");
+            SecureCreds(accessToken, appName);
         }
 
         private static void AcquireNewOAuthToken()
