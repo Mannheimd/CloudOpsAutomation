@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using Log_Handler;
+using Dropbox.Api.FileRequests;
 
 namespace DropboxDataCleanup
 {
@@ -85,7 +86,7 @@ namespace DropboxDataCleanup
                     if (folder.metadata.PathLower + "/" == folderPathWithSlash)
                         continue;
 
-                    if (folder.HasNoInDateContent(maxAge, content.Entries))
+                    if (await folder.CanBeDeletedAsync(maxAge, content.Entries))
                     {
                         returnList.Add(item);
                     }
@@ -131,6 +132,12 @@ namespace DropboxDataCleanup
             this.metadata = metadata;
         }
 
+        public async Task<bool> CanBeDeletedAsync(TimeSpan maxAge, IList<Metadata> content)
+        {
+            return (IsNotEmpty(content) && HasNoInDateContent(maxAge, content));
+            // Did make an async call to HasNoOpenRequests, removed that due to Dropbox API limitation
+        }
+
         private List<Metadata> GetChildren(IList<Metadata> content)
         {
             LogHandler.CreateEntry(SeverityLevel.Debug, "Fetching children of " + metadata.PathLower);
@@ -152,7 +159,7 @@ namespace DropboxDataCleanup
             return returnList;
         }
 
-        public bool HasNoInDateContent(TimeSpan maxAge, IList<Metadata> content)
+        private bool HasNoInDateContent(TimeSpan maxAge, IList<Metadata> content)
         {
             LogHandler.CreateEntry(SeverityLevel.Debug, "Checking for content in " + metadata.PathLower + " modified after " + (DateTime.Now - maxAge));
 
@@ -175,6 +182,41 @@ namespace DropboxDataCleanup
             }
             LogHandler.CreateEntry(SeverityLevel.Debug, "Did not find in-date content in " + metadata.PathLower);
             return true;
+        }
+
+        /// <summary>
+        /// Only checks for open requests by the active user. This is a limitation of the Dropbox API.
+        /// </summary>
+        /// <returns></returns>
+        private async Task<bool> HasNoOpenRequests()
+        {
+            DropboxClient client = ApplicationVariables.dropboxClient;
+
+            ListFileRequestsResult requests = await client.FileRequests.ListAsync();
+            foreach (FileRequest request in requests.FileRequests)
+            {
+                if (request.Destination == metadata.PathLower)
+                    return false;
+            }
+
+            return true;
+        }
+
+        private bool IsNotEmpty(IList<Metadata> content)
+        {
+            LogHandler.CreateEntry(SeverityLevel.Trace, "Checking if folder is empty: " + metadata.PathLower);
+
+            List<Metadata> children = GetChildren(content);
+            if (children == null || children.Count == 0)
+            {
+                LogHandler.CreateEntry(SeverityLevel.Info, "Folder is empty: " + metadata.PathLower);
+                return false;
+            }
+            else
+            {
+                LogHandler.CreateEntry(SeverityLevel.Trace, "Folder is not empty: " + metadata.PathLower);
+                return true;
+            }
         }
     }
 
