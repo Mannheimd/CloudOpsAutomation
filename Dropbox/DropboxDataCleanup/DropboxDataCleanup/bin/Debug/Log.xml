@@ -218,4 +218,10 @@
       <Subject>Finished deleting out of date content</Subject>
     </LogEntry>
   </LogSession>
+  <LogSession StartTime="2018-05-30T12:51:22.0437419+01:00" CurrentApplicationVersion="1.0.0.0" MachineName="NCL-100000176" UserName="SWIFTPAGE\christopher.manders">
+    <LogEntry Time="2018-05-30T12:51:22.0397042+01:00">
+      <Severity>Error</Severity>
+      <Subject>Config file doesn't exist: C:\git-repos\CloudOps-Automation\Dropbox\DropboxDataCleanup\DropboxDataCleanup\bin\Debugconfig.json</Subject>
+    </LogEntry>
+  </LogSession>
 </Log>

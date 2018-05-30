@@ -7,6 +7,8 @@ using System.Windows;
 using Log_Handler;
 using Dropbox.Api.FileRequests;
 using Dropbox.Api.Async;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace DropboxDataCleanup
 {
@@ -30,7 +32,12 @@ namespace DropboxDataCleanup
     {
         public static async void Run()
         {
-            await DropboxTasks.DeleteOutOfDateContentAsync("/ExternalUpload/Cloud Data", new TimeSpan(31, 0, 0, 0));
+            foreach (Folder folder in ApplicationVariables.config.folders)
+            {
+                MessageBox.Show(folder.path + " | " + folder.maxAge);
+            }
+
+            //await DropboxTasks.DeleteOutOfDateContentAsync("/ExternalUpload/Cloud Data", new TimeSpan(31, 0, 0, 0));
 
             Application.Current.Shutdown();
         }
@@ -320,5 +327,38 @@ namespace DropboxDataCleanup
                 return _dropboxClient;
             }
         }
+
+        public static string configPath = Environment.CurrentDirectory + "\\config.json";
+
+        private static Config _config;
+        public static Config config
+        {
+            get
+            {
+                if (_config == null)
+                {
+                    if (!File.Exists(configPath))
+                    {
+                        LogHandler.CreateEntry(SeverityLevel.Error, "Config file doesn't exist: " + configPath);
+                        return null;
+                    }
+
+                    string json = File.ReadAllText(configPath);
+                    _config = JsonConvert.DeserializeObject<Config>(json);
+                }
+                return _config;
+            }
+        }
+    }
+
+    public class Config
+    {
+        public List<Folder> folders { get; set; }
+    }
+
+    public class Folder
+    {
+        public string path { get; set; }
+        public TimeSpan maxAge { get; private set; }
     }
 }
