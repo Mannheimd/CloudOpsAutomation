@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Log>
+  <LogSession StartTime="2018-05-31T12:43:27.4325731+01:00" CurrentApplicationVersion="1.0.0.0" MachineName="NCL-100000176" UserName="SWIFTPAGE\christopher.manders">
+    <LogEntry Time="2018-05-31T12:43:27.4244799+01:00">
+      <Severity>Error</Severity>
+      <Subject>Config file doesn't exist: C:\git-repos\CloudOps-Automation\Dropbox\DropboxDataCleanup\DropboxDataCleanup\bin\Release\config.json</Subject>
+    </LogEntry>
+  </LogSession>
+</Log>
