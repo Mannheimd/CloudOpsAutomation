@@ -34,10 +34,8 @@ namespace DropboxDataCleanup
         {
             foreach (Folder folder in ApplicationVariables.config.folders)
             {
-                MessageBox.Show(folder.path + " | " + folder.maxAge);
+                await DropboxTasks.DeleteOutOfDateContentAsync(folder.path, folder.maxAge);
             }
-
-            //await DropboxTasks.DeleteOutOfDateContentAsync("/ExternalUpload/Cloud Data", new TimeSpan(31, 0, 0, 0));
 
             Application.Current.Shutdown();
         }
@@ -359,6 +357,6 @@ namespace DropboxDataCleanup
     public class Folder
     {
         public string path { get; set; }
-        public TimeSpan maxAge { get; private set; }
+        public TimeSpan maxAge { get; set; }
     }
 }

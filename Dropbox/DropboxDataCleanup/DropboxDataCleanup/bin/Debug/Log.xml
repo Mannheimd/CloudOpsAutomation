@@ -224,4 +224,64 @@
       <Subject>Config file doesn't exist: C:\git-repos\CloudOps-Automation\Dropbox\DropboxDataCleanup\DropboxDataCleanup\bin\Debugconfig.json</Subject>
     </LogEntry>
   </LogSession>
+  <LogSession StartTime="2018-05-31T12:40:58.4148060+01:00" CurrentApplicationVersion="1.0.0.0" MachineName="NCL-100000176" UserName="SWIFTPAGE\christopher.manders">
+    <LogEntry Time="2018-05-31T12:40:58.4117983+01:00">
+      <Severity>Info</Severity>
+      <Subject>Looking for items in /externalupload/cloud data older than 31.00:00:00</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-31T12:41:15.9863840+01:00">
+      <Severity>Debug</Severity>
+      <Subject>Getting contents of /externalupload/cloud data with recursive flag set to True</Subject>
+    </LogEntry>
+  </LogSession>
+  <LogSession StartTime="2018-05-31T12:41:42.2675804+01:00" CurrentApplicationVersion="1.0.0.0" MachineName="NCL-100000176" UserName="SWIFTPAGE\christopher.manders">
+    <LogEntry Time="2018-05-31T12:41:42.2635700+01:00">
+      <Severity>Info</Severity>
+      <Subject>Looking for items in /externalupload/cloud data older than 31.00:00:00</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-31T12:41:42.3323995+01:00">
+      <Severity>Debug</Severity>
+      <Subject>Getting contents of /externalupload/cloud data with recursive flag set to True</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-31T12:41:42.8687874+01:00">
+      <Severity>Info</Severity>
+      <Subject>Nothing to delete</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-31T12:41:42.8768088+01:00">
+      <Severity>Info</Severity>
+      <Subject>Finished deleting out of date content</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-31T12:41:42.8828533+01:00">
+      <Severity>Info</Severity>
+      <Subject>Looking for items in /apps older than 1.00:00:00</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-31T12:41:42.8892533+01:00">
+      <Severity>Debug</Severity>
+      <Subject>Getting contents of /apps with recursive flag set to True</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-31T12:41:43.2690076+01:00">
+      <Severity>Trace</Severity>
+      <Subject>Checking if folder is empty: /apps/manders api test</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-31T12:41:43.2760266+01:00">
+      <Severity>Debug</Severity>
+      <Subject>Fetching children of /apps/manders api test</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-31T12:41:43.2835482+01:00">
+      <Severity>Debug</Severity>
+      <Subject>Found 0 children of /apps/manders api test</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-31T12:41:43.2900805+01:00">
+      <Severity>Info</Severity>
+      <Subject>Folder is empty: /apps/manders api test</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-31T12:41:43.2960853+01:00">
+      <Severity>Info</Severity>
+      <Subject>Nothing to delete</Subject>
+    </LogEntry>
+    <LogEntry Time="2018-05-31T12:41:43.3031323+01:00">
+      <Severity>Info</Severity>
+      <Subject>Finished deleting out of date content</Subject>
+    </LogEntry>
+  </LogSession>
 </Log>
